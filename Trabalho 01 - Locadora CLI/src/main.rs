@@ -103,7 +103,69 @@ fn fazer_aluguel() {
 
 //parte do lucas aqui
 
-//parte do arthur aqui
+fn cadastrar_filme() {
+    use chrono::NaiveDate;
+
+    println!("==== Cadastrar Filme ====");
+    let mut titulo = String::new();
+    let mut genero = String::new();
+    let mut duracao = String::new();
+    let mut sinopse = String::new();
+
+    println!("Digite o título do filme:");
+    io::stdin().read_line(&mut titulo).expect("Erro ao ler entrada.");
+    println!("Digite o gênero do filme:");
+    io::stdin().read_line(&mut genero).expect("Erro ao ler entrada.");
+
+    // Validação da duração
+    let duracao: u32 = loop {
+        println!("Digite a duração do filme (em minutos):");
+        duracao.clear();
+        io::stdin().read_line(&mut duracao).expect("Erro ao ler entrada.");
+
+        match duracao.trim().parse::<u32>() {
+            Ok(valor) if (30..=180).contains(&valor) => break valor,
+            _ => println!("Duração inválida. Insira um número inteiro entre 30 e 180."),
+        }
+    };
+
+    println!("Digite a sinopse do filme:");
+    io::stdin().read_line(&mut sinopse).expect("Erro ao ler entrada.");
+
+    // Validação do lançamento
+    let lancamento = loop {
+        println!("Digite a data de lançamento do filme (no formato yyyy-mm-dd):");
+        let mut input_lancamento = String::new();
+        io::stdin().read_line(&mut input_lancamento).expect("Erro ao ler entrada.");
+        let input_lancamento = input_lancamento.trim();
+
+        // Verifica se o formato é válido (4 dígitos, hífen, 2 dígitos, hífen, 2 dígitos)
+        if input_lancamento.len() == 10
+            && input_lancamento.chars().nth(4) == Some('-')
+            && input_lancamento.chars().nth(7) == Some('-')
+            && input_lancamento.chars().all(|c| c.is_digit(10) || c == '-')
+        {
+            match NaiveDate::parse_from_str(input_lancamento, "%Y-%m-%d") {
+                Ok(data) => break data,
+                Err(_) => println!("Data inválida. Certifique-se de que a data seja real."),
+            }
+        } else {
+            println!("Formato inválido. Certifique-se de usar o formato yyyy-mm-dd.");
+        }
+    };
+
+    // Adiciona o filme e salva no arquivo
+    let mut filmes = Filme::carregar();
+    filmes.push(Filme::novo(
+        titulo.trim().to_string(),
+        lancamento,
+        genero.trim().to_string(),
+        duracao,
+        sinopse.trim().to_string(),
+    ));
+    Filme::salvar(&filmes).expect("Erro ao salvar filme.");
+    println!("Filme cadastrado com sucesso!");
+}
 
 fn visualizar_historico() {
     println!("==== Histórico de Aluguéis ====");
