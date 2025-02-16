@@ -1,0 +1,60 @@
+fn cadastrar_cliente() {
+    println!("==== Cadastrar Cliente ====");
+    let mut nome = String::new();
+    let mut email = String::new();
+
+    // Captura o nome
+    println!("Digite o nome do cliente:");
+    io::stdin().read_line(&mut nome).expect("Erro ao ler entrada.");
+
+    // Validação do email
+    loop {
+        println!("Digite o email do cliente:");
+        io::stdin().read_line(&mut email).expect("Erro ao ler entrada.");
+        let email_trimmed = email.trim(); // Remove espaços em branco e quebras de linha
+
+        if email_trimmed.len() > 9 && email_trimmed.ends_with("@gmail.com") {
+            break; // Email válido, sai do loop
+        } else {
+            println!("Email inválido. Certifique-se de que o email termina com '@gmail.com'. Tente novamente.");
+        }
+    }
+
+    // Captura e valida o telefone como número
+    let telefone: u64;
+    loop {
+        let mut telefone_input = String::new();
+        println!("Digite o telefone do cliente:");
+        io::stdin()
+            .read_line(&mut telefone_input)
+            .expect("Erro ao ler entrada.");
+        let telefone_trimmed = telefone_input.trim();
+
+        match telefone_trimmed.parse::<u64>() {
+            Ok(num) => {
+                // Verifica se o número está dentro dos intervalos permitidos
+                if (num >= 219_0000_0000 && num <= 219_9999_9999)
+                    || (num >= 229_0000_0000 && num <= 229_9999_9999)
+                {
+                    telefone = num;
+                    break; // Telefone válido, sai do loop
+                } else {
+                    println!("Telefone inválido. Deve conter os DDDs 21 ou 22, e começar com 9. Tente novamente.");
+                }
+            }
+            Err(_) => {
+                println!("Telefone inválido. Deve conter apenas números. Tente novamente.");
+            }
+        }
+    }
+
+    // Adiciona o cliente e salva no arquivo
+    let mut clientes = Cliente::carregar();
+    clientes.push(Cliente::novo(
+        nome.trim().to_string(),
+        email.trim().to_string(),
+        telefone,
+    ));
+    Cliente::salvar(&clientes).expect("Erro ao salvar cliente.");
+    println!("Cliente cadastrado com sucesso!");
+}
